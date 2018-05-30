@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace ExtCore.Infrastructure
 {
@@ -15,7 +16,7 @@ namespace ExtCore.Infrastructure
   public static class ExtensionManager
   {
     private static IEnumerable<Assembly> assemblies;
-    private static IDictionary<Type, IEnumerable<Type>> types;
+    private static ConcurrentDictionary<Type, IEnumerable<Type>> types;
 
     /// <summary>
     /// Gets the cached assemblies that have been set by the SetAssemblies method.
@@ -35,7 +36,7 @@ namespace ExtCore.Infrastructure
     public static void SetAssemblies(IEnumerable<Assembly> assemblies)
     {
       ExtensionManager.assemblies = assemblies;
-      ExtensionManager.types = new Dictionary<Type, IEnumerable<Type>>();
+      ExtensionManager.types = new ConcurrentDictionary<Type, IEnumerable<Type>>();
     }
 
     /// <summary>
@@ -108,7 +109,7 @@ namespace ExtCore.Infrastructure
             implementations.Add(exportedType);
 
       if (useCaching)
-        ExtensionManager.types.Add(type, implementations);
+        ExtensionManager.types[type] = implementations;
 
       return implementations;
     }
